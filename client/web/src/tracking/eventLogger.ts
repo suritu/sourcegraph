@@ -13,6 +13,7 @@ export const COHORT_ID_KEY = 'sourcegraphCohortId'
 export const FIRST_SOURCE_URL_KEY = 'sourcegraphSourceUrl'
 export const LAST_SOURCE_URL_KEY = 'sourcegraphRecentSourceUrl'
 export const DEVICE_ID_KEY = 'sourcegraphDeviceId'
+const isProduction = process.env.NODE_ENV === 'production'
 
 export class EventLogger implements TelemetryService {
     private hasStrippedQueryParameters = false
@@ -65,7 +66,9 @@ export class EventLogger implements TelemetryService {
         pageTitle = `View${pageTitle}`
 
         const props = pageViewQueryParameters(window.location.href)
-        serverAdmin.trackPageView(pageTitle, logAsActiveUser, eventProperties)
+        if (isProduction) {
+            serverAdmin.trackPageView(pageTitle, logAsActiveUser, eventProperties)
+        }
         this.logToConsole(pageTitle, props)
 
         // Use flag to ensure URL query params are only stripped once
@@ -93,7 +96,9 @@ export class EventLogger implements TelemetryService {
         if (window.context?.userAgentIsBot || !eventLabel) {
             return
         }
-        serverAdmin.trackAction(eventLabel, eventProperties, publicArgument)
+        if (isProduction) {
+            serverAdmin.trackAction(eventLabel, eventProperties, publicArgument)
+        }
         this.logToConsole(eventLabel, eventProperties, publicArgument)
     }
 
