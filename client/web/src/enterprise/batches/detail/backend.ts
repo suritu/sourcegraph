@@ -910,4 +910,7 @@ export const queryAvailableBulkOperations = ({
             }
         `,
         { batchChange, changesets }
-    ).pipe(map(dataOrThrowErrors), map(result => result.availableBulkOperations))
+    ).pipe(
+        map(dataOrThrowErrors),
+        map(result => result.availableBulkOperations)
+    )
