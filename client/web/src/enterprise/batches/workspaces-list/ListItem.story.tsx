@@ -2,6 +2,7 @@ import React from 'react'
 
 import { storiesOf } from '@storybook/react'
 
+// eslint-disable-next-line no-restricted-imports
 import { WebStory } from '@sourcegraph/web/src/components/WebStory'
 
 import { mockWorkspace } from '../create/workspaces-preview/WorkspacesPreview.mock'
