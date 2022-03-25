@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"database/sql"
+	"encoding/json"
 	"flag"
 	"fmt"
 	"os"
@@ -285,10 +286,27 @@ func driftExec(ctx context.Context, args []string) error {
 	}
 	targets := strings.Split(*driftTargetsFlag, ",")
 
-	// TODO - Describe current database
+	r, err := makeRunner(ctx, []string{databaseName})
+	if err != nil {
+		return err
+	}
+	store, err := r.Store(ctx, databaseName)
+	if err != nil {
+		return err
+	}
+
+	currentDescription, err := store.Describe(ctx)
+	if err != nil {
+		return err
+	}
+
 	// TODO - Describe exepcted database with given targets
 	// TODO - Diff outputs and return results
 
-	fmt.Printf("> %#v\n> %#v (len=%d)\n\n", database, targets, len(targets))
+	serialized, err := json.MarshalIndent(currentDescription, "", "    ")
+	if err != nil {
+		return err
+	}
+	fmt.Printf("> %#v\n> %#v (len=%d)\n> %s\n\n", database, targets, len(targets), serialized)
 	return fmt.Errorf("Unimplemented")
 }
