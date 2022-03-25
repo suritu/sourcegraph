@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"strings"
 
 	"github.com/Masterminds/semver"
 	"github.com/peterbourgon/ff/v3/ffcli"
@@ -75,6 +76,18 @@ var (
 		LongHelp:   cliutil.ConstructLongHelp(),
 	}
 
+	driftFlagSet          = flag.NewFlagSet("sg migration drift", flag.ExitOnError)
+	driftDatabaseNameFlag = driftFlagSet.String("db", db.DefaultDatabase.Name, "The target schema to read")
+	driftTargetsFlag      = driftFlagSet.String("target", "", "The migration to apply. Comma-separated values are accepted.")
+	driftCommand          = &ffcli.Command{
+		Name:       "drift",
+		ShortUsage: fmt.Sprintf("sg migration drift [-db=%s] -target=<target>,<target>,...", db.DefaultDatabase.Name),
+		ShortHelp:  "Detect drift between live and expected schemas",
+		FlagSet:    driftFlagSet,
+		Exec:       driftExec,
+		LongHelp:   cliutil.ConstructLongHelp(),
+	}
+
 	migrationFlagSet = flag.NewFlagSet("sg migration", flag.ExitOnError)
 	migrationCommand = &ffcli.Command{
 		Name:       "migration",
@@ -95,6 +108,7 @@ var (
 			addLogCommand,
 			leavesCommand,
 			squashCommand,
+			driftCommand,
 		},
 	}
 )
@@ -169,7 +183,7 @@ func addExec(ctx context.Context, args []string) error {
 		database, ok = db.DatabaseByName(databaseName)
 	)
 	if !ok {
-		stdout.Out.WriteLine(output.Linef("", output.StyleWarning, "ERROR: database %q not found :(", databaseName))
+		stdout.Out.WriteLine(output.Linef("", output.StyleWarning, "ERROR: database %q not found", databaseName))
 		return flag.ErrHelp
 	}
 
@@ -204,7 +218,7 @@ func squashExec(ctx context.Context, args []string) (err error) {
 		database, ok = db.DatabaseByName(databaseName)
 	)
 	if !ok {
-		stdout.Out.WriteLine(output.Linef("", output.StyleWarning, "ERROR: database %q not found :(", databaseName))
+		stdout.Out.WriteLine(output.Linef("", output.StyleWarning, "ERROR: database %q not found", databaseName))
 		return flag.ErrHelp
 	}
 
@@ -248,4 +262,33 @@ func findTargetSquashCommit(migrationName string) (string, error) {
 	}
 
 	return fmt.Sprintf("v%d.%d.0", currentVersion.Major(), currentVersion.Minor()-minimumMigrationSquashDistance-1), nil
+}
+
+func driftExec(ctx context.Context, args []string) error {
+	if len(args) != 0 {
+		stdout.Out.WriteLine(output.Linef("", output.StyleWarning, "ERROR: too many arguments"))
+		return flag.ErrHelp
+	}
+
+	var (
+		databaseName = *driftDatabaseNameFlag
+		database, ok = db.DatabaseByName(databaseName)
+	)
+	if !ok {
+		stdout.Out.WriteLine(output.Linef("", output.StyleWarning, "ERROR: database %q not found", databaseName))
+		return flag.ErrHelp
+	}
+
+	if *driftTargetsFlag == "" {
+		stdout.Out.WriteLine(output.Linef("", output.StyleWarning, "ERROR: supply a migration target via -target"))
+		return flag.ErrHelp
+	}
+	targets := strings.Split(*driftTargetsFlag, ",")
+
+	// TODO - Describe current database
+	// TODO - Describe exepcted database with given targets
+	// TODO - Diff outputs and return results
+
+	fmt.Printf("> %#v\n> %#v (len=%d)\n\n", database, targets, len(targets))
+	return fmt.Errorf("Unimplemented")
 }
