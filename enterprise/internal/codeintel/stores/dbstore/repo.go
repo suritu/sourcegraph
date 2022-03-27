@@ -65,7 +65,7 @@ func scanRepoNames(rows *sql.Rows, queryErr error) (_ map[int]string, err error)
 
 // RepoNames returns a map from repository id to names.
 func (s *Store) RepoNames(ctx context.Context, repositoryIDs ...int) (_ map[int]string, err error) {
-	ctx, endObservation := s.operations.repoName.With(ctx, &err, observation.Args{LogFields: []log.Field{
+	ctx, endObservation := s.operations.repoNames.With(ctx, &err, observation.Args{LogFields: []log.Field{
 		log.Int("numRepositories", len(repositoryIDs)),
 	}})
 	defer endObservation(1, observation.Args{})

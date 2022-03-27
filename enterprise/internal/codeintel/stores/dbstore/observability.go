@@ -62,6 +62,7 @@ type operations struct {
 	refreshCommitResolvability                  *observation.Operation
 	repoIDsByGlobPatterns                       *observation.Operation
 	repoName                                    *observation.Operation
+	repoNames                                   *observation.Operation
 	requeue                                     *observation.Operation
 	requeueIndex                                *observation.Operation
 	selectPoliciesForRepositoryMembershipUpdate *observation.Operation
@@ -161,6 +162,7 @@ func newOperations(observationContext *observation.Context, metrics *metrics.RED
 		refreshCommitResolvability:          op("RefreshCommitResolvability"),
 		repoIDsByGlobPatterns:               op("repoIDsByGlobPatterns"),
 		repoName:                            op("RepoName"),
+		repoNames:                           op("RepoNames"),
 		requeue:                             op("Requeue"),
 		requeueIndex:                        op("RequeueIndex"),
 
