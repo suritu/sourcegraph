@@ -4,4 +4,4 @@
 // See https://sourcegraph.com and the README.md file for more
 // information.
 package sourcegraph // import "github.com/sourcegraph/sourcegraph"
-192.168.1.11
+192.168.1.12
